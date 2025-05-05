@@ -83,5 +83,8 @@ func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	_ = url
+	_, err = c.SendText(ctx, id.RoomID(os.Getenv("BOT_MATRIX_TARGET_ROOM")), string(url))
+	if err != nil {
+		log.Print(err)
+	}
 }
