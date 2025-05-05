@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -44,5 +45,18 @@ func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	_ = resp
+	resp, err = http.Post("https://pb.nichi.co/", resp.Header.Get("Content-Type"), resp.Body)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	defer resp.Body.Close()
+
+	url, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	_ = url
 }
