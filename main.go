@@ -10,7 +10,11 @@ import (
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"maunium.net/go/mautrix"
+	"maunium.net/go/mautrix/id"
 )
+
+var c *mautrix.Client
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -21,7 +25,28 @@ func main() {
 		log.Fatal(err)
 	}
 
+	c, err = mautrix.NewClient("matrix.org", "", "")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = c.Login(ctx, &mautrix.ReqLogin{
+		Type:             mautrix.AuthTypePassword,
+		DeviceID:         id.DeviceID(os.Getenv("BOT_MATRIX_DEVICEID")),
+		Identifier:       mautrix.UserIdentifier{Type: mautrix.IdentifierTypeUser, User: os.Getenv("BOT_MATRIX_USERID")},
+		Password:         os.Getenv("BOT_MATRIX_PASSWORD"),
+		StoreCredentials: true,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	b.Start(ctx)
+
+	_, err = c.Logout(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
